@@ -15,11 +15,12 @@ const Quiz = () => {
     const [accuracy, setAccuracy] = useState(0);
     const [progress, setProgress] = useState(0);
     const [attempts, setAttempts] = useState(0); // Initialize progress to 0%
+    const [isSQ, setIsSQ] = useState(false)
     const navigate = useNavigate();
 
     const fetchQuestions = () => {
         setLoading(true);
-        fetch(`https://server-a05v.onrender.com/api/chapters/${chapterId}/questions`)
+        fetch(`https://server-kp20.onrender.com/api/chapters/${chapterId}/questions`)
             .then(response => response.json())
             .then(data => {
                 setQuestions(data);
@@ -62,7 +63,7 @@ const Quiz = () => {
         setStarted(true);
         setSelectedAnswer(index);
         setAttempts(attempts + 1);
-        if (index === questions[currentQuestionIndex].correctAnswer) {
+        if (isSQ ? index === questions[currentQuestionIndex].similarCorrect : index === questions[currentQuestionIndex].correctAnswer) {
             setScore(score + 1);
             setAnswerStatus('Correct');
 
@@ -88,16 +89,23 @@ const Quiz = () => {
         }
     };
 
-    const handleTrySimilarQuestion = () => {
+    let currentQuestion = questions[currentQuestionIndex];
+
+    const handleTrySimilarQuestion = (id) => {
+        setIsSQ(true)
         setAnswerStatus(null);
         setShowHint(false);
         setSelectedAnswer(null);
-        fetchQuestions();
-        setCurrentQuestionIndex(0);
+        // fetchQuestions();
+        // setCurrentQuestionIndex(0);
         setProgress(0);  // Reset progress when retrying similar questions
+
+        currentQuestion = questions[currentQuestionIndex].similarText
+
+        console.log(currentQuestion)
     };
 
-    const currentQuestion = questions[currentQuestionIndex];
+
 
     if (loading) {
         return (
@@ -166,23 +174,30 @@ const Quiz = () => {
                     <div className='m-6 p-6 bg-[#EFF6FF] border border-blue-300 rounded-lg'>
                         <div className="mb-4 flex items-center justify-between">
                             <p className="font-semibold text-lg mb-1">
-                                {currentQuestion.questionText}
+                                {isSQ ? currentQuestion.similarText : currentQuestion.questionText}
                             </p>
                             <span className="text-xs px-2 py-1 bg-blue-200 text-blue-800 rounded">
                                 {currentQuestion.difficulty}
                             </span>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                            {currentQuestion.answers.map((answer, index) => (
+                            {(isSQ ? currentQuestion.similarAnswer : currentQuestion.answers).map((answer, index) => (
+                                // <button
+                                //     key={index}
+                                //     onClick={() => handleAnswerClick(index)}
+                                //     className={`p-2  rounded-lg text-left text-blue-700 font-medium  ${selectedAnswer === index
+                                //         ?  index === currentQuestion.correctAnswer
+                                //             ? 'bg-green-500 text-white'
+                                //             : 'bg-[#f1f1f1] text-gray-400'
+                                //         : 'bg-white'
+                                //         }`}
+                                // >
+                                //     {answer}
+                                // </button>
                                 <button
                                     key={index}
                                     onClick={() => handleAnswerClick(index)}
-                                    className={`p-2  rounded-lg text-left text-blue-700 font-medium  ${selectedAnswer === index
-                                        ? index === currentQuestion.correctAnswer
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-[#f1f1f1] text-gray-400'
-                                        : 'bg-white'
-                                        }`}
+                                    className={`p-2  rounded-lg text-left text-blue-700 font-medium ${selectedAnswer === index ? isSQ && index === currentQuestion.similarCorrect ? "bg-green-500 text-slate-100" : !isSQ && index === currentQuestion.correctAnswer ? "bg-green-500 text-slate-100" : "bg-gray-500 text-white" : "bg-white text-gray-500"} `}
                                 >
                                     {answer}
                                 </button>
@@ -214,7 +229,7 @@ const Quiz = () => {
                                             <p className="mt-2 text-blue-800">{currentQuestion.hint}</p>
                                         )}
                                         <button
-                                            onClick={handleTrySimilarQuestion}
+                                            onClick={() => handleTrySimilarQuestion(currentQuestion._id)}
                                             className="mt-4 bg-blue-600 text-white p-2 rounded-lg w-full hover:bg-blue-700"
                                         >
                                             Try Similar Question
