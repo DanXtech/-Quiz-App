@@ -7,7 +7,7 @@ const QuizSelection = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetch('https://server-a05v.onrender.com/api/chapters')
+        fetch('https://server-kp20.onrender.com/api/chapters')
             .then(response => response.json())
             .then(data => {
                 setChapters(data)
@@ -66,4 +66,3 @@ const QuizSelection = () => {
 };
 
 export default QuizSelection;
-
